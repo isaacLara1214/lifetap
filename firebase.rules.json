@@ -1,0 +1,46 @@
+{
+  "rules": {
+    "sessions": {
+      "$session": {
+        ".read": true,
+        ".write": true,
+        ".validate": [
+          "newData.hasChildren(['code', 'createdAt', 'status', 'creatorId', 'playerCount', 'players'])",
+          "newData.child('code').isString()",
+          "newData.child('code').val().length === 6",
+          "newData.child('status').isString()",
+          "newData.child('status').val() === 'active' || newData.child('status').val() === 'closed'",
+          "newData.child('creatorId').isString()",
+          "newData.child('playerCount').isNumber()",
+          "newData.child('playerCount').val() >= 2",
+          "newData.child('playerCount').val() <= 10",
+          "newData.child('players').isObject()"
+        ],
+        "players": {
+          "$player": {
+            ".validate": [
+              "newData.hasChildren(['id', 'name', 'life', 'color', 'commanderCount', 'commanders', 'damageReceived', 'isDead'])",
+              "newData.child('name').isString()",
+              "newData.child('life').isNumber()",
+              "newData.child('color').isString()",
+              "newData.child('commanderCount').isNumber()",
+              "newData.child('isDead').isBoolean()",
+              "newData.child('commanders').isArray()"
+            ],
+            "commanders": {
+              "$commander": {
+                ".validate": [
+                  "newData.hasChildren(['id', 'name'])",
+                  "newData.child('name').isString()"
+                ]
+              }
+            },
+            "damageReceived": {
+              ".validate": "newData.isArray()"
+            }
+          }
+        }
+      }
+    }
+  }
+}
