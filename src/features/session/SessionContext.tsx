@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, useRef, Re
 import { Session, Player, PlayerLock } from './types'
 import { generateSessionCode, generatePlayerId, createPlaceholderPlayer, generateCommanderId, createDefaultCommander } from './utils'
 import { PLAYER_COLORS } from './types'
-import { subscribeToSession, createSession as fbCreateSession, updatePlayer as fbUpdatePlayer, deleteSession, setPlayerOnline, acquireLock, releaseLock } from '../../lib/firebase'
+import { subscribeToSession, createSession as fbCreateSession, updatePlayer as fbUpdatePlayer, setPlayerOnline, acquireLock, releaseLock } from '../../lib/firebase'
 
 function toArray<T>(value: unknown): T[] {
   if (Array.isArray(value)) {
@@ -342,22 +342,14 @@ export function SessionProvider({ children }: Props) {
     releaseLock(sessionCode, cardId)
   }, [sessionCode])
 
-  const leaveSession = useCallback(async () => {
+  const leaveSession = useCallback(() => {
     cleanupSubscription()
-    
-    if (sessionCode && session?.creatorId === currentPlayerId) {
-      try {
-        await deleteSession(sessionCode)
-      } catch (err) {
-        console.error('Failed to delete session:', err)
-      }
-    }
-    
+
     setSession(null)
     setCurrentPlayerId('')
     setSessionCode('')
     setError(null)
-  }, [session, sessionCode, currentPlayerId, cleanupSubscription])
+  }, [cleanupSubscription])
 
   return (
     <SessionContext.Provider value={{
