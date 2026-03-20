@@ -36,6 +36,14 @@ function normalizeSession(session: Session): Session {
   }
 }
 
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message
+  }
+
+  return fallback
+}
+
 type SessionContextType = {
   session: Session | null
   currentPlayerId: string
@@ -138,7 +146,7 @@ export function SessionProvider({ children }: Props) {
       return code
     } catch (err) {
       console.error('Failed to create session:', err)
-      setError('Failed to create session')
+      setError(getErrorMessage(err, 'Failed to create session'))
       setIsLoading(false)
       throw err
     }
@@ -171,7 +179,7 @@ export function SessionProvider({ children }: Props) {
       return true
     } catch (err) {
       console.error('Failed to join session:', err)
-      setError('Failed to join session')
+      setError(getErrorMessage(err, 'Failed to join session'))
       setIsLoading(false)
       return false
     }
@@ -232,12 +240,12 @@ export function SessionProvider({ children }: Props) {
     
     const attacker = session.players[attackerId]
     if (!attacker) return
-    
+
     const commander = attacker.commanders.find(c => c.id === commanderId)
     if (!commander) return
-    
+
     const newLife = defender.life - damage
-    
+
     const damageReceived = Array.isArray(defender.damageReceived)
       ? [...defender.damageReceived]
       : []
@@ -255,7 +263,7 @@ export function SessionProvider({ children }: Props) {
         damageByCommander: { [commanderId]: damage }
       })
     }
-    
+
     fbUpdatePlayer(sessionCode, defenderId, { life: newLife, damageReceived })
   }, [session, sessionCode])
 
@@ -279,11 +287,11 @@ export function SessionProvider({ children }: Props) {
     
     const existingEntry = { ...damageReceived[existingEntryIndex] }
     existingEntry.damageByCommander = { ...existingEntry.damageByCommander }
-    
+
     const currentDamage = existingEntry.damageByCommander[commanderId] || 0
     const newDamage = Math.max(0, currentDamage - damage)
     const lifeRestore = currentDamage - newDamage
-    
+
     if (newDamage === 0) {
       delete existingEntry.damageByCommander[commanderId]
     } else {
@@ -295,10 +303,10 @@ export function SessionProvider({ children }: Props) {
     } else {
       damageReceived[existingEntryIndex] = existingEntry
     }
-    
-    fbUpdatePlayer(sessionCode, defenderId, { 
+
+    fbUpdatePlayer(sessionCode, defenderId, {
       life: defender.life + lifeRestore,
-      damageReceived 
+      damageReceived
     })
   }, [session, sessionCode])
 

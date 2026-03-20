@@ -11,18 +11,21 @@ export function CreateGameModal({ onCreate, onClose }: Props) {
   const [playerCount, setPlayerCount] = useState(4)
   const [playerName, setPlayerName] = useState('')
   const [isCreating, setIsCreating] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const { createSession } = useSession()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!playerName.trim() || isCreating) return
-    
+
     setIsCreating(true)
+    setSubmitError(null)
     try {
       const code = await createSession(playerCount, playerName.trim())
       onCreate(code)
     } catch (err) {
       console.error('Failed to create session:', err)
+      setSubmitError(err instanceof Error ? err.message : 'Failed to create session')
     } finally {
       setIsCreating(false)
     }
@@ -63,6 +66,10 @@ export function CreateGameModal({ onCreate, onClose }: Props) {
               <span>{PLAYER_COUNT_MAX}</span>
             </div>
           </div>
+
+          {submitError && (
+            <p className="text-sm text-red-400">{submitError}</p>
+          )}
 
           <div className="flex gap-3">
             <button

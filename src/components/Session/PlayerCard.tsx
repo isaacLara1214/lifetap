@@ -29,11 +29,13 @@ export function PlayerCard({ player, allPlayers }: Props) {
 
   useEffect(() => {
     const dead = checkDeath(player)
+
     if (dead !== isDead) {
       setIsDead(dead)
-      if (dead) {
-        updatePlayer(player.id, { isDead: true })
-      }
+    }
+
+    if (player.isDead !== dead) {
+      updatePlayer(player.id, { isDead: dead })
     }
   }, [player, isDead, updatePlayer])
 
